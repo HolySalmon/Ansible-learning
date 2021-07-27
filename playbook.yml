@@ -1,0 +1,47 @@
+# Learning playbook for gb courses
+---
+- hosts: "gb"
+  become: true
+  tasks:
+          - name: "Create some directory"
+            file:
+              path: /root/some_directory
+              state: directory
+              mode: '0755'
+          - name: "Download Random file from the internet"
+            command: curl -o RandomFile https://assets.dynatrace.com/en/docs/fs/6148-building-resiliency-devops-cloud-fact-sheet-dynatrace.pdf?_ga=2.225243484.715947570.1627246190-1490713463.1627246190
+          - name: "some preparations for rhel centos 7"
+            yum:
+              name=epel-release
+              state=present
+          - name: "Install some packages"
+            yum:
+              name: "{{ packages }}"
+              state: latest
+            vars:
+              packages:
+                - htop
+                - unzip
+                - telnet
+                - java
+                - python
+                - nginx
+          - name: "start nginx"
+            systemd:
+              state: restarted
+              name: nginx.service
+          - name: get current http stats
+            nginx_status_info:
+              url: http://localhost/
+              timeout: 10
+            register: result
+          - name: Add user
+            user:
+              name: geekbrains
+              state: present
+              password: password
+              shell: /bin/bash
+              groups: root
+              append: yes
+
+              
